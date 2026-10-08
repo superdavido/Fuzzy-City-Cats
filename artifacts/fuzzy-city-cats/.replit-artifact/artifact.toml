@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Fuzzy City Cats"
+description = "A playful 3D hidden-object game set in a lively miniature city. Find five roaming cats before the two-minute timer runs out, rotate the city to search from different angles, and replay to beat your time."
+version = "1.0.0"
+id = "artifacts/fuzzy-city-cats"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25590
+
+[services.development]
+run = "pnpm --filter @workspace/fuzzy-city-cats run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/fuzzy-city-cats", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/fuzzy-city-cats/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25590"
+BASE_PATH = "/"
