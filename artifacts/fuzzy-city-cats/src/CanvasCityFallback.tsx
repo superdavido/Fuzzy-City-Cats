@@ -52,6 +52,7 @@ function polygon(ctx: CanvasRenderingContext2D, project: Project, points: [numbe
 export default function CanvasCityFallback({ playing, found, rotation, onCatFound }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
   const rotationRef = useRef(rotation);
+  const mapRotationRef = useRef(rotation);
   const foundRef = useRef(found);
   const playingRef = useRef(playing);
   const onCatFoundRef = useRef(onCatFound);
@@ -69,6 +70,7 @@ export default function CanvasCityFallback({ playing, found, rotation, onCatFoun
     let frame = 0;
     let lastWidth = 0;
     let lastHeight = 0;
+    let lastFrame = 0;
     const startedAt = performance.now();
 
     canvas.className = 'city-canvas';
@@ -93,6 +95,8 @@ export default function CanvasCityFallback({ playing, found, rotation, onCatFoun
     canvas.addEventListener('pointerdown', onPointerDown);
 
     const draw = (now: number) => {
+      const dt = lastFrame ? Math.min(.06, (now - lastFrame) / 1000) : 0;
+      lastFrame = now;
       const width = host.clientWidth;
       const height = host.clientHeight;
       if (!width || !height) {
@@ -110,7 +114,9 @@ export default function CanvasCityFallback({ playing, found, rotation, onCatFoun
       }
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, width, height);
-      const angle = rotationRef.current;
+      const turnEase = 1 - Math.exp(-8.5 * dt);
+      mapRotationRef.current += (rotationRef.current - mapRotationRef.current) * turnEase;
+      const angle = mapRotationRef.current;
       const scale = Math.min(width / 26, height / 17.2);
       const project: Project = (x, z, y = 0) => {
         const rx = x * Math.cos(angle) - z * Math.sin(angle);

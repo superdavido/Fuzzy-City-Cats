@@ -238,9 +238,11 @@ export default function CityScene({ playing, found, rotation, onCatFound }: City
   const callbackRef = useRef(onCatFound);
   const foundRef = useRef(found);
   const playingRef = useRef(playing);
+  const rotationTargetRef = useRef(rotation);
   callbackRef.current = onCatFound;
   foundRef.current = found;
   playingRef.current = playing;
+  rotationTargetRef.current = rotation;
 
   useEffect(() => {
     const host = containerRef.current;
@@ -338,6 +340,8 @@ export default function CityScene({ playing, found, rotation, onCatFound }: City
     const animate = (now: number) => {
       const dt = Math.min(0.06, (now - (last || now)) / 1000);
       last = now;
+      const turnEase = 1 - Math.exp(-8.5 * dt);
+      city.rotation.y += (rotationTargetRef.current - city.rotation.y) * turnEase;
       cats.forEach((cat, id) => {
         if (foundRef.current.includes(id)) return;
         const path = cat.userData.path as number[][];
@@ -390,10 +394,6 @@ export default function CityScene({ playing, found, rotation, onCatFound }: City
       engineRef.current = null;
     };
   }, []);
-
-  useEffect(() => {
-    if (engineRef.current) engineRef.current.city.rotation.y = rotation;
-  }, [rotation]);
 
   useEffect(() => {
     const engine = engineRef.current;
